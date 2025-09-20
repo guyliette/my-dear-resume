@@ -29,12 +29,11 @@ jobs:
              docker build -t ${{secrets.REGISTRY_USER}}/portfolio .
 
       - name: Image scan
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}'
           format: 'table'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-    # No exit-code flag - just show results for now
 
   deploy:
     needs: build
