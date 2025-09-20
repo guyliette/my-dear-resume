@@ -37,15 +37,17 @@ jobs:
 
   deploy:
     needs: build
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
-     - name: SSH to server
+     - name: SSH to Server
+       uses: appleboy/ssh-action@v1
        with:
-         host: ${{ secrets.HOST }}
-         username: ${{ secrets.USERNAME }}
-         key: ${{ secrets.KEY }}
-        # port: ${{ secrets.PORT }}
-         script: |
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+         # port: ${{ secrets.PORT }}
+
+          script: |
                   docker rm -f resume
                   docker run -d --nameresume -p 8080:5001 ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
           
