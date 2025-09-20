@@ -29,6 +29,6 @@ jobs:
       
       - name: push image
         run: |
-            dockerlogin -u guyliette2023 -p ${{secrets.REGISTRY_PASS}}
+            docker login -u guyliette2023 -p ${{secrets.REGISTRY_PASS}}
             docker push guyliette2023/portfolio
         
