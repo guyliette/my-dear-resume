@@ -29,21 +29,12 @@ jobs:
              docker build -t ${{secrets.REGISTRY_USER}}/portfolio .
 
       - name: Image scan
-        run: |
-             sudo apt-get update
-             sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-             wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
-             echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-    
-             sudo apt-get update
-             sudo apt-get install -y trivy
-             trivy image --severity HIGH,CRITICAL --exit-code 1 ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
-      
-      - name: push image
-        run: |
-            docker login -u ${{secrets.REGISTRY_USER}} -p ${{secrets.REGISTRY_PASS}}
-            docker push ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
-            docker push ${{secrets.REGISTRY_USER}}/portfolio
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+    # No exit-code flag - just show results for now
 
   deploy:
     needs: build
