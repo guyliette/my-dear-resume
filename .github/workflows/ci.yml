@@ -2,27 +2,20 @@
 
 name: CI
 
-
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-  
   workflow_dispatch:
 
-
 jobs:
-  
   build:
-   
     runs-on: ubuntu-latest
-
     
     steps:
-     
       - uses: actions/checkout@v4
+      
       - name: build image
         run: |
              docker build -t ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}} .
@@ -32,6 +25,12 @@ jobs:
         run: |
               docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
               aquasec/trivy:latest image ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
+
+      - name: push image
+        run: |
+            docker login -u ${{secrets.REGISTRY_USER}} -p ${{secrets.REGISTRY_PASS}}
+            docker push ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
+            docker push ${{secrets.REGISTRY_USER}}/portfolio
 
   deploy:
     needs: build
@@ -43,9 +42,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-         # port: ${{ secrets.PORT }}
           script: |
-                  docker rm -f resume
+                  docker rm -f resume || true
+                  docker pull ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
                   docker run -d --name resume -p 8080:5001 ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
-          
-        
