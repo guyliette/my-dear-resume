@@ -30,14 +30,14 @@ jobs:
 
       - name: Image scan
         run: |
- 
-              sudo apt-get update
-              sudo apt-get install wget apt-transport-https gnupg lsb-release
-              wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-              echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-              sudo apt-get update
-              sudo apt-get install trivy
-              trivy image --severity HIGH,CRITICAL --exit-code 1 ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
+             sudo apt-get update
+             sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+             wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+             echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+    
+             sudo apt-get update
+             sudo apt-get install -y trivy
+             trivy image --severity HIGH,CRITICAL --exit-code 1 ${{secrets.REGISTRY_USER}}/portfolio:${{github.run_number}}
       
       - name: push image
         run: |
